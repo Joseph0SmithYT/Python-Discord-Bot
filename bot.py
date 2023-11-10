@@ -7,7 +7,7 @@ from discord.ext import commands
 import interactions
 
 load_dotenv()
-TOKEN = "MTE1Mjc4NTUyOTAzNzkzNDY2Mg.GK5yJS.pgXdZ9l0jSBCgwMoI4gxX-Aq_CavRe2wD67jsM"
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True

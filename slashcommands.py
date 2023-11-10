@@ -1,8 +1,13 @@
 import random
 import interactions
 from interactions import ActionRow, Button
+import os 
+from dotenv import load_dotenv
 
-bot = interactions.Client(token="MTE1Mjc4NTUyOTAzNzkzNDY2Mg.GK5yJS.pgXdZ9l0jSBCgwMoI4gxX-Aq_CavRe2wD67jsM")
+load_dotenv()
+
+TOKEN = os.getenv('DISCORD_TOKEN')
+bot = interactions.Client(token=TOKEN)
 
 rockpaperscissors = ["rock","newspaper","scissors"]
 

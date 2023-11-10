@@ -2,6 +2,9 @@
 
 import discord
 from discord import app_commands
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -9,7 +12,7 @@ intents.members = True
 
 client = discord.Client(intents=intents)
 
-TOKEN = "MTE1Mjc4NTUyOTAzNzkzNDY2Mg.GK5yJS.pgXdZ9l0jSBCgwMoI4gxX-Aq_CavRe2wD67jsM"
+TOKEN = os.getenv('DISCORD_TOKEN')
 from typing import Optional
 
 import discord
