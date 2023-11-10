@@ -71,9 +71,7 @@ async def choose_player(ctx, human_sign):
 
 @bot.component("scissors")
 async def scissors_component(ctx: interactions.ComponentContext):
-    await ctx.send("Scissors!")
     await choose_player(ctx,rockpaperscissors[2])
-    await ctx.send("Scissors passed!")
 @bot.component("rock")
 async def rock_component(ctx: interactions.ComponentContext):
     await choose_player(ctx, rockpaperscissors[0])
