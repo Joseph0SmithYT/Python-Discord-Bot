@@ -1,4 +1,5 @@
 #! /bin/env python3
+import logging
 import sys
 from colorsys import hsv_to_rgb, rgb_to_hsv
 import discord
@@ -10,12 +11,16 @@ import json
 
 from jsondatabase import JSONDatabase
 load_dotenv('C:/Users/craft/source/repos/Quortle/.env')
-TOKEN = os.getenv('NEW_TOKEN')  
+TOKEN = os.getenv('COUNTBANNED')  
 # print(TOKEN)
 
 intents = discord.Intents.default()
-client = discord.Client(intents=intents)
+client = discord.Client(intents=intents)    
 tree = app_commands.CommandTree(client)
+servers = [
+    discord.Object(id=1152789940040642560),
+    discord.Object(id=998062686610931755)
+]
 
 """
 handle_or_tag()
@@ -60,7 +65,7 @@ Adds a quote to the database
 @tree.command(
     name="add_quote",
     description="Adds a quote",
-    guild=discord.Object(id=1152789940040642560)
+    guilds=servers
 )
 async def add_quote(interaction, person: discord.User, quote: str):
     db = JSONDatabase("quotes.json")
@@ -78,7 +83,7 @@ Gets the quotes from the database and lists it
 @tree.command(
     name="get_quotes",
     description="Gets quotes",
-    guild=discord.Object(id=1152789940040642560)
+    guilds=servers
 )
 async def get_quotes(interaction, person: discord.User):
     db = JSONDatabase("quotes.json")
@@ -100,7 +105,7 @@ Removes the quote from the database
 @tree.command(
     name="remove_quote",
     description="Removes a quote",
-    guild=discord.Object(id=1152789940040642560)
+    guilds=servers
 )
 async def remove_quote(interaction, person: discord.User, quote: str):
     db = JSONDatabase("quotes.json")
@@ -116,7 +121,7 @@ Clears a person's quote from the database, if no person is specified, clears all
 @tree.command(
     name="clear",
     description="Clears",
-    guild=discord.Object(id=1152789940040642560)
+    guilds=servers
 )
 async def clear_quotes(interaction, person: discord.User = None):
     if interaction.user.id == 511296836078796820:
@@ -139,7 +144,7 @@ Quits the bot
 @tree.command(
     name="quit",
     description="Quits",
-    guild=discord.Object(id=1152789940040642560)
+    guilds=servers
 )
 async def quit_bot(interaction):
     if interaction.user.id == 511296836078796820:
@@ -148,10 +153,11 @@ async def quit_bot(interaction):
         await client.close()
     else:
         await interaction.response.send_message("You don't have permission to do that! :(")
+        
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id=1152789940040642560))
-    print("Ready!")
+    await tree.sync()
+    print(f"Logged in as @{handle_or_tag(client.user)}")
 
 """
 start_bot()
