@@ -68,7 +68,7 @@ Adds a quote to the database
     guilds=servers
 )
 async def add_quote(interaction, person: discord.User, quote: str):
-    db = JSONDatabase("quotes.json")
+    db = JSONDatabase("databases/quotes.json")
     rightnowTime = datetime.datetime.now().strftime("%H:%M")
     db.add_quote(person.id, quote, rightnowTime, datetime.date.today().strftime("%d/%m/%Y"))
     quote = db.get_quotes(person.id)[-1]
@@ -86,7 +86,7 @@ Gets the quotes from the database and lists it
     guilds=servers
 )
 async def get_quotes(interaction, person: discord.User):
-    db = JSONDatabase("quotes.json")
+    db = JSONDatabase("databases/quotes.json")
     quotes = db.get_quotes(person.id)
     embed = make_quote_embed(title=f"Quotes for {handle_or_tag(person)}", person=person)
     embed.set_footer(text=f"As of {datetime.datetime.today().strftime('%d/%m/%Y')} at {datetime.datetime.now().strftime('%H:%M')}")
@@ -108,7 +108,7 @@ Removes the quote from the database
     guilds=servers
 )
 async def remove_quote(interaction, person: discord.User, quote: str):
-    db = JSONDatabase("quotes.json")
+    db = JSONDatabase("databases/quotes.json")
     db.remove_quote(person.id, quote)
     embed = make_quote_embed(quote=quote, person=person, title=f"Removed quote for {handle_or_tag(person)}")
     await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -125,7 +125,7 @@ Clears a person's quote from the database, if no person is specified, clears all
 )
 async def clear_quotes(interaction, person: discord.User = None):
     if interaction.user.id == 511296836078796820:
-        db = JSONDatabase("quotes.json")
+        db = JSONDatabase("databases/quotes.json")
         if person:
             for quote in db.get_quotes(person.id):
                 print(quote)
@@ -153,7 +153,7 @@ async def quit_bot(interaction):
         await client.close()
     else:
         await interaction.response.send_message("You don't have permission to do that! :(")
-        
+
 @client.event
 async def on_ready():
     await tree.sync()
