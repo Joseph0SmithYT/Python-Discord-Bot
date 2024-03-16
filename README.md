@@ -1,2 +1,28 @@
-# Milestonify
- A simple app that adds useless points when you feed it your accomplishments!
+# Quortle
+
+
+A simple Discord bot dedicated to storing your quotes! 
+
+# Commands
+## Consumer Commands
+ - `add_quote`
+   - Adds a quote to the quote book.
+ - `remove_quote`
+   - Removes a quote from the quote book.
+ - `get_quotes`
+   - Fetches the quotes in a easy-to-read format
+
+## Admin Commands
+ - `clear`
+   - Clears a certain person's quotes (if a person has been specified) or just clears the whole book
+ - `quit`
+   - Shuts the bot down
+
+
+# Functions
+
+- `handle_or_tag(person: discord.User)`
+  - Returns a string determining on if the User has a discriminator or not.\
+- `
+
+<ins>Bot is in closed beta. </ins>

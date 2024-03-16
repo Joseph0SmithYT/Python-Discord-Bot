@@ -1,29 +1,27 @@
-#! /bin/env python3
-import logging
-import sys
 from colorsys import hsv_to_rgb, rgb_to_hsv
 import discord
 from discord import app_commands
 from dotenv import load_dotenv
 import os
 import datetime
-import json
 
 from jsondatabase import JSONDatabase
 load_dotenv('C:/Users/craft/source/repos/Quortle/.env')
-TOKEN = os.getenv('COUNTBANNED')  
+TOKEN = os.getenv('QUORTLE')  
 # print(TOKEN)
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)    
 tree = app_commands.CommandTree(client)
-servers = [
+guilds = [
     discord.Object(id=1152789940040642560),
-    discord.Object(id=998062686610931755)
+    discord.Object(id=998062686610931755),
+    discord.Object(id=1158714701304311808)
 ]
-
+#region Functions
 """
 handle_or_tag()
+        person: Discord User
 
 Returns the handle or tag of a user, depending on if they have a discriminator or not
 """
@@ -34,7 +32,10 @@ def handle_or_tag(person: discord.User):
         return f"{person.name}#{person.discriminator}"
 
 """
-make_quote_embed
+make_quote_embed()
+        quote: str
+        person: Discord User
+        title: str
 
 Generates an embed for a quote, with a random color
 """
@@ -56,7 +57,9 @@ def make_quote_embed(quote: str = None, person: discord.User = None, title: str 
     embed.set_thumbnail(url=person.display_avatar.url)
     embed.set_footer(text=f"Added on {datetime.datetime.today().strftime('%d/%m/%Y')} at {datetime.datetime.now().strftime('%H:%M')}")
     return embed
+#endregion
 
+#region Consumer Commands
 """
 ! add_quote <person> <quote>
 
@@ -65,7 +68,7 @@ Adds a quote to the database
 @tree.command(
     name="add_quote",
     description="Adds a quote",
-    guilds=servers
+    guilds=guilds
 )
 async def add_quote(interaction, person: discord.User, quote: str):
     db = JSONDatabase("databases/quotes.json")
@@ -83,7 +86,7 @@ Gets the quotes from the database and lists it
 @tree.command(
     name="get_quotes",
     description="Gets quotes",
-    guilds=servers
+    guilds=guilds
 )
 async def get_quotes(interaction, person: discord.User):
     db = JSONDatabase("databases/quotes.json")
@@ -105,14 +108,16 @@ Removes the quote from the database
 @tree.command(
     name="remove_quote",
     description="Removes a quote",
-    guilds=servers
+    guilds=guilds
 )
 async def remove_quote(interaction, person: discord.User, quote: str):
     db = JSONDatabase("databases/quotes.json")
     db.remove_quote(person.id, quote)
     embed = make_quote_embed(quote=quote, person=person, title=f"Removed quote for {handle_or_tag(person)}")
     await interaction.response.send_message(embed=embed, ephemeral=True)
-
+#endregion
+    
+#region Admin Commands
 """
 clear [person]
 
@@ -121,7 +126,7 @@ Clears a person's quote from the database, if no person is specified, clears all
 @tree.command(
     name="clear",
     description="Clears",
-    guilds=servers
+    guilds=guilds
 )
 async def clear_quotes(interaction, person: discord.User = None):
     if interaction.user.id == 511296836078796820:
@@ -144,7 +149,7 @@ Quits the bot
 @tree.command(
     name="quit",
     description="Quits",
-    guilds=servers
+    guilds=guilds
 )
 async def quit_bot(interaction):
     if interaction.user.id == 511296836078796820:
@@ -153,10 +158,15 @@ async def quit_bot(interaction):
         await client.close()
     else:
         await interaction.response.send_message("You don't have permission to do that! :(")
+#endregion
+        
 
 @client.event
 async def on_ready():
     await tree.sync()
+    # for guild in servers:
+    #     await tree.sync(guild=guild)
+    #     print(f"Synced tree")
     print(f"Logged in as @{handle_or_tag(client.user)}")
 
 """
