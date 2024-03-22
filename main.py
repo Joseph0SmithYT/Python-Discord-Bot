@@ -7,7 +7,6 @@ import datetime
 
 from jsondatabase import JSONDatabase
 load_dotenv('C:/Users/craft/source/repos/Quortle/.env')
-TOKEN = os.getenv('QUORTLE')  
 # print(TOKEN)
 
 intents = discord.Intents.default()
@@ -61,6 +60,7 @@ def make_quote_embed(quote: str = None, person: discord.User = None, title: str 
 
 #region Consumer Commands
 """
+! GLOBAL
 ! add_quote <person> <quote>
 
 Adds a quote to the database
@@ -68,7 +68,6 @@ Adds a quote to the database
 @tree.command(
     name="add_quote",
     description="Adds a quote",
-    guilds=guilds
 )
 async def add_quote(interaction, person: discord.User, quote: str):
     db = JSONDatabase("databases/quotes.json")
@@ -78,7 +77,15 @@ async def add_quote(interaction, person: discord.User, quote: str):
     embed = make_quote_embed(quote=quote['quote'], person=person, title=f"Added quote for {handle_or_tag(person)}")
     await interaction.response.send_message(embed=embed)
 
+@tree.command(
+    name="ping",
+    description="Pings the bot",
+)
+async def ping(interaction):
+    await interaction.response.send_message(f"Pong! {round(client.latency * 1000)}ms")
+
 """
+! GLOBAL
 ! get_quotes <person>
 
 Gets the quotes from the database and lists it
@@ -86,7 +93,6 @@ Gets the quotes from the database and lists it
 @tree.command(
     name="get_quotes",
     description="Gets quotes",
-    guilds=guilds
 )
 async def get_quotes(interaction, person: discord.User):
     db = JSONDatabase("databases/quotes.json")
@@ -101,6 +107,7 @@ async def get_quotes(interaction, person: discord.User):
     await interaction.response.send_message(embed=embed)
 
 """
+! GLOBAL
 ! remove_quote <person> <quote>
 
 Removes the quote from the database
@@ -108,7 +115,6 @@ Removes the quote from the database
 @tree.command(
     name="remove_quote",
     description="Removes a quote",
-    guilds=guilds
 )
 async def remove_quote(interaction, person: discord.User, quote: str):
     db = JSONDatabase("databases/quotes.json")
@@ -118,6 +124,7 @@ async def remove_quote(interaction, person: discord.User, quote: str):
 #endregion
     
 #region Admin Commands
+    
 """
 clear [person]
 
@@ -141,6 +148,48 @@ async def clear_quotes(interaction, person: discord.User = None):
             await interaction.response.send_message("Cleared quotes.")
 
 """
+! Admin required!!
+/ sync
+
+Syncs the command tree with all servers
+"""
+@tree.command(
+    name="sync",
+    description="Syncs the command tree with all servers",
+    guilds=guilds
+)
+async def sync_tree(interaction, only_this_server: bool = False):
+    if interaction.user.id == 511296836078796820:
+        if only_this_server:
+            print("Syncing tree...")
+            synced = await tree.sync(guild=discord.Object(id=interaction.guild.id))
+            await interaction.response.send_message(f"Synced {len(synced)} commands")
+            return
+        print("Syncing tree...")
+        synced = await tree.sync()
+        await interaction.response.send_message(f"Synced {len(synced)} commands")
+    else:
+        await interaction.response.send_message("You don't have permission to do that! :(")
+
+"""
+! Admin Required!!
+/ tree
+
+Shows the command tree
+"""
+@tree.command(
+    name="tree",
+    description="Shows the command tree",
+    guilds=guilds
+)
+async def show_tree(interaction):
+    if interaction.user.id == 511296836078796820:
+        await interaction.response.send_message(f"```{len(tree.get_commands())} commands```")
+    else:
+        await interaction.response.send_message("You don't have permission to do that! :(")
+
+
+"""
 ! Admin Required!!
 / quit
 
@@ -159,14 +208,35 @@ async def quit_bot(interaction):
     else:
         await interaction.response.send_message("You don't have permission to do that! :(")
 #endregion
-        
+
+#region Context Commands
+@app_commands.context_menu(name="Quote")
+async def quote(interaction: discord.Interaction, message: discord.Message):
+    db = JSONDatabase("databases/quotes.json")
+    db.add_quote(interaction.user.id, message.content, datetime.datetime.now().strftime("%H:%M"), datetime.date.today().strftime("%d/%m/%Y"))
+    embed = make_quote_embed(quote=message.content, person=interaction.user, title="Added quote")
+    await interaction.response.send_message(embed=embed)
+tree.add_command(quote)
+
+@app_commands.context_menu(name="List Quotes")
+async def list_quotes(interaction: discord.Interaction, message: discord.User):
+    db = JSONDatabase("databases/quotes.json")
+    quotes = db.get_quotes(message.id)
+    embed = make_quote_embed(quote=None, person=message, title=f"Quotes for {handle_or_tag(message)}")
+    if quotes == None or len(quotes) == 0:
+        embed.add_field(name="No quotes found", value="Add one with /add_quote", inline=False)
+    else:
+        for quote in quotes:
+            embed.add_field(name=f"\"{quote['quote']}\"", value=f"Added on {quote['date']} at {quote['time']}" ,inline=False)
+    await interaction.response.send_message(embed=embed)
+tree.add_command(list_quotes)
+
+
+#endregion
 
 @client.event
 async def on_ready():
-    await tree.sync()
-    # for guild in servers:
-    #     await tree.sync(guild=guild)
-    #     print(f"Synced tree")
+    # await tree.sync()
     print(f"Logged in as @{handle_or_tag(client.user)}")
 
 """
@@ -174,7 +244,20 @@ start_bot()
 
 Starts the bot
 """
-def start_bot():
+def start_bot(TOKEN = None):
+    TOKEN = TOKEN.upper()
+    if TOKEN in ['QUORTLE', 'COUNTBANNED', 'CANCRISCODING']:
+        TOKEN = os.getenv(TOKEN)
+    elif TOKEN is None:
+        TOKEN = os.getenv('QUORTLE')
+    else:
+        print("Invalid token")
+        exit(
+            "Please set the following environment variables:\n"
+            "QUORTLE_TOKEN\n"
+            "COUNTBANNED_TOKEN\n"
+            "CANCRISCODING_TOKEN\n" 
+        )
     print("Starting...")
     client.run(TOKEN)
 

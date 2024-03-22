@@ -12,13 +12,6 @@ A simple Discord bot dedicated to storing your quotes!
  - `get_quotes`
    - Fetches the quotes in a easy-to-read format
 
-## Admin Commands
- - `clear`
-   - Clears a certain person's quotes (if a person has been specified) or just clears the whole book
- - `quit`
-   - Shuts the bot down
-
-
 # Functions
 
 - `handle_or_tag(person: discord.User)`
